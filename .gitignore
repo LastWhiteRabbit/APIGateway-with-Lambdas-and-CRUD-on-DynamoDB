@@ -1,0 +1,14 @@
+# dotenv environment variables file
+.env
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Compiled output
+dist/
+
+# Build
+*.js
+
+cdk.out/
