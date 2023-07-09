@@ -1,6 +1,6 @@
 export interface Match {
   match_id: string;
-  timestamp: string;
+  timestamptmp: string;
   team: string;
   opponent: string;
   event_type: string;
@@ -10,13 +10,17 @@ export interface Match {
 export interface EventDetails {
   player: Player;
   goal_type: string;
-  minute: number;
+  goalMinute: number;
   assist?: Player;
   video_url?: string;
 }
 
 export interface Player {
-  name: string;
-  position: string;
-  number: number;
+  playerName: string;
+  playerPosition: string;
+  playerNumber: number;
+}
+
+export interface Statistic {
+  [key:string]: any 
 }

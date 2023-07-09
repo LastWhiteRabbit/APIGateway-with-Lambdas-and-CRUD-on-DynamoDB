@@ -25,7 +25,7 @@ export const handler = async (event: any = {}): Promise<any> => {
     TableName: TABLE_NAME,
     Item: {
       itemId,
-      item
+      ...item
     },
   };
 
