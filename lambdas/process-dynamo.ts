@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Statistic } from './types';
 
 const PRIMARY_KEY = process.env.PRIMARY_KEY || '';
-const destinationTable = 'statistics';
+const DESTINATION_TABLE_NAME = process.env.DESTINATION_TABLE_NAME || 'statistics';
 
 const db = new AWS.DynamoDB.DocumentClient();
 
@@ -21,7 +21,7 @@ export const handler = async (event: DynamoDBStreamEvent) => {
       const { match_id } = item;
 
       const existingStatistic = await db.get({
-        TableName: destinationTable,
+        TableName: DESTINATION_TABLE_NAME,
         Key: {
           [PRIMARY_KEY]: match_id
         }
@@ -31,7 +31,7 @@ export const handler = async (event: DynamoDBStreamEvent) => {
 
       if (existingStatistic.Item) {
         await db.update({
-          TableName: destinationTable,
+          TableName: DESTINATION_TABLE_NAME,
           Key: {
             [PRIMARY_KEY]: match_id
           },
@@ -56,7 +56,7 @@ export const handler = async (event: DynamoDBStreamEvent) => {
       matchStatistic[PRIMARY_KEY] = match_id;
 
       const params = {
-        TableName: destinationTable,
+        TableName: DESTINATION_TABLE_NAME,
         Item: matchStatistic
       }
 

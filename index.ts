@@ -76,8 +76,22 @@ export class ApiLambdaCrudDynamoDBStack extends Stack {
       startingPosition: lambda.StartingPosition.LATEST,
     }));
 
-    // Grant the Lambda function read access to the DynamoDB table
-    processDynamoTable.grantReadWriteData(processDynamoLambda);
+    // Create a Lambda function for getting statistics
+
+    const getOneStatisticsLambda = new NodejsFunction(this, 'getOneStatisticsFunction', {
+      entry: join(__dirname, 'lambdas', 'get-one-statistics.ts'),
+      bundling: {
+        externalModules: [
+          'aws-sdk', // Use the 'aws-sdk' available in the Lambda runtime
+        ],
+      },
+      depsLockFilePath: join(__dirname, 'lambdas', 'package-lock.json'),
+      environment: {
+        PRIMARY_KEY: 'id',
+        TABLE_NAME: processDynamoTable.tableName,
+      },
+      runtime: Runtime.NODEJS_14_X,
+    });
 
     // Create a Lambda function for each of the CRUD operations
     const getOneLambda = new NodejsFunction(this, 'getOneMatchFunction', {
@@ -108,12 +122,18 @@ export class ApiLambdaCrudDynamoDBStack extends Stack {
     ingestDynamoTable.grantReadWriteData(updateOneLambda);
     ingestDynamoTable.grantReadWriteData(deleteOneLambda);
 
+    // Grant the Lambda function read access to the DynamoDB table
+    processDynamoTable.grantReadWriteData(processDynamoLambda);
+    processDynamoTable.grantReadWriteData(getOneStatisticsLambda);
+
+
     // Integrate the Lambda functions with the API Gateway resource
     const getAllIntegration = new LambdaIntegration(getAllLambda);
     const createOneIntegration = new LambdaIntegration(createOneLambda);
     const getOneIntegration = new LambdaIntegration(getOneLambda);
     const updateOneIntegration = new LambdaIntegration(updateOneLambda);
     const deleteOneIntegration = new LambdaIntegration(deleteOneLambda);
+    const getOneStatisticsIntegration = new LambdaIntegration(getOneStatisticsLambda);
 
 
     // Create an API Gateway resource for each of the CRUD operations
@@ -131,6 +151,10 @@ export class ApiLambdaCrudDynamoDBStack extends Stack {
     singleMatch.addMethod('PATCH', updateOneIntegration);
     singleMatch.addMethod('DELETE', deleteOneIntegration);
     addCorsOptions(singleMatch);
+
+    const singleStatistics = singleMatch.addResource('statistics');
+    singleStatistics.addMethod('GET', getOneStatisticsIntegration);
+    addCorsOptions(singleStatistics);
   }
 }
 
