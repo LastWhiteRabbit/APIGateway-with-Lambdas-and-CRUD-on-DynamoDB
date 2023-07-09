@@ -1,15 +1,4 @@
 # APIGateway with CORS, Lambdas, and CRUD on DynamoDB
-<!--BEGIN STABILITY BANNER-->
----
-
-![Stability: Stable](https://img.shields.io/badge/stability-Stable-success.svg?style=for-the-badge)
-
-> **This is a stable example. It should successfully build out of the box**
->
-> This examples is built on Construct Libraries marked "Stable" and does not have any infrastructure prerequisites to build.
-
----
-<!--END STABILITY BANNER-->
 
 This an example of an APIGateway with CORS enabled, pointing to five Lambdas executing CRUD operations on a single DynamoDB table.
 
@@ -27,7 +16,7 @@ This will install the necessary CDK, then this example's dependencies, then the 
 
 ## Deploy
 
-Run `cdk deploy`. This will deploy / redeploy your Stack to your AWS Account.
+Run `cdk deploy` or `cdk deploy --profile`. This will deploy / redeploy your Stack to your AWS Account.
 
 After the deployment you will see the API's URL, which represents the url you can then use.
 
@@ -37,12 +26,13 @@ The whole component contains:
 
 - An API, with CORS enabled on all HTTP Methods. (Use with caution, for production apps you will want to enable only a certain domain origin to be able to query your API.)
 - Lambda pointing to `lambdas/create.ts`, containing code for __storing__ an item  into the DynamoDB table.
-- Lambda pointing to `lambdas/delete-one.ts`, containing code for __deleting__ an item from the DynamoDB table.
+- Lambda pointing to `lambdas/delete-one.ts`, containing code for __deleting__ an item from the DynamoDB table. // NOT YET IMPLEMENTED
 - Lambda pointing to `lambdas/get-all.ts`, containing code for __getting all items__ from the DynamoDB table.
 - Lambda pointing to `lambdas/get-one.ts`, containing code for __getting an item__ from the DynamoDB table.
-- Lambda pointing to `lambdas/update-one.ts`, containing code for __updating an item__ in the DynamoDB table.
-- A DynamoDB table `matches` that stores the data.
-- Five `LambdaIntegrations` that connect these Lambdas to the API.
+- Lambda pointing to `lambdas/update-one.ts`, containing code for __updating an item__ in the DynamoDB table. // NOT YET IMPLEMENTED
+- Lambda pointing to `lambdas/get-one-statistics.ts`, containing code for __getting a statistics__ in the DynamoDB table.
+- A DynamoDB table `matches` that stores the data and another DynamoDB table `statistics` that stores processed data.
+- Six `LambdaIntegrations` that connect these Lambdas to the API.
 
 ## CDK Toolkit
 
@@ -63,4 +53,26 @@ After building your TypeScript code, you will be able to run the CDK toolkit com
 
     $ cdk diff
     <shows diff against deployed stack>
+```
+
+## Helpers
+
+cURL command for sending in data to DynamoDB.
+
+```bash
+curl --location --request POST '${URL That you get on cdk deploy}/matches' --header 'Content-Type: application/json' --user aws_access_key_id:aws_secret_access_key --aws-sigv4 'aws:amz:eu-west-2:execute-api' --data-raw '{"match_id": "54321", "timestamptmp":"2023-06-22T19:45:30Z", "team":"FC Barcelona", "opponent":"Real Madrid", "event_type":"goal", "event_details":{ "player":{"playerName":"Lionel Messi", "position":"Forward", "number":10}, "goal_type":"penality", "minute":30, "assist": {"playerName":"Sergio Busquete", "position":"Midfielder", "number":9}, "video_url":"https://example.com/goal_video.mp4"}}'
+```
+
+After deploy to get all matches go to:
+
+```bash
+https://yoururl.execute-api.eu-west-2.amazonaws.com/prod/matches
+```
+To get one match go to:
+```bash
+https://yoururl.execute-api.eu-west-2.amazonaws.com/prod/matches/{id}
+```
+To get statistics of a match go to:
+```bash
+https://yoururl.execute-api.eu-west-2.amazonaws.com/prod/matches/{id}/statistics
 ```
